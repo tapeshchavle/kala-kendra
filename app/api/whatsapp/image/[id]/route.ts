@@ -4,9 +4,12 @@ import { ObjectId } from 'mongodb';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     if (!id || id.length !== 24) {
       return new NextResponse('Invalid Image ID', { status: 400 });
