@@ -13,23 +13,53 @@ export async function POST(request: Request) {
     }
 
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const extension = file.name.split('.').pop();
+    const extension = file.name ? file.name.split('.').pop() : 'png';
     const filename = `${uniqueSuffix}.${extension}`;
 
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const blob = await put(`whatsapp/${filename}`, file, {
-        access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
-      return NextResponse.json({ url: blob.url });
+      console.log('Using Vercel Blob for upload...');
+      try {
+        const blob = await put(`whatsapp/${filename}`, file, {
+          access: 'public',
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        });
+        return NextResponse.json({ url: blob.url });
+      } catch (blobError: any) {
+        console.error('Vercel Blob put error:', blobError);
+        return NextResponse.json(
+          { error: 'Vercel Blob upload failed', details: blobError?.message },
+          { status: 500 }
+        );
+      }
     } else {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const dir = join(process.cwd(), 'public', 'uploads', 'whatsapp');
-      await mkdir(dir, { recursive: true });
-      const path = join(dir, filename);
-      await writeFile(path, buffer);
-      return NextResponse.json({ url: `/uploads/whatsapp/${filename}` });
+      console.log('Falling back to local filesystem for upload...');
+      try {
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const dir = join(process.cwd(), 'public', 'uploads', 'whatsapp');
+        
+        // Catch read-only file system errors on platforms like Vercel
+        try {
+          await mkdir(dir, { recursive: true });
+          const path = join(dir, filename);
+          await writeFile(path, buffer);
+          return NextResponse.json({ url: `/uploads/whatsapp/${filename}` });
+        } catch (fsError: any) {
+          if (fsError.code === 'EROFS') {
+            return NextResponse.json(
+              { error: 'Read-only file system. Please configure Vercel Blob storage by setting BLOB_READ_WRITE_TOKEN.' },
+              { status: 500 }
+            );
+          }
+          throw fsError;
+        }
+      } catch (fsError: any) {
+        console.error('Filesystem upload error:', fsError);
+        return NextResponse.json(
+          { error: 'Local upload failed', details: fsError?.message },
+          { status: 500 }
+        );
+      }
     }
   } catch (error: any) {
     console.error('WhatsApp upload error:', error);
