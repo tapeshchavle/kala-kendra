@@ -32,21 +32,31 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Convert file buffer to base64 Data URI to avoid Vercel edge/stream issues
-    const mimeType = file.type || 'application/octet-stream';
-    const base64Data = buffer.toString('base64');
-    const dataURI = `data:${mimeType};base64,${base64Data}`;
-
-    const uploadResult = await cloudinary.uploader.upload(dataURI, {
-      folder: 'whatsapp',
-      resource_type: 'auto',
+    // Use robust upload_stream which handles all file types safely without Base64 memory overhead
+    const uploadResult = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'whatsapp',
+          resource_type: 'auto',
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary stream error:', error);
+            return reject(error);
+          }
+          resolve(result);
+        },
+      );
+      
+      // End the stream with the file buffer
+      uploadStream.end(buffer);
     });
 
     return NextResponse.json({ url: uploadResult.secure_url });
   } catch (error: any) {
     console.error('WhatsApp Cloudinary upload error:', error);
     return NextResponse.json(
-      { error: 'Upload failed', details: error?.message || String(error) },
+      { error: 'Upload failed', details: error?.message || 'Unknown Cloudinary API error' },
       { status: 500 },
     );
   }
