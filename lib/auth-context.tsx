@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch { /* ignore */ }
     localStorage.removeItem('token');
+    localStorage.removeItem('cart_items');
     setToken(null);
     setUser(null);
     window.location.href = '/';

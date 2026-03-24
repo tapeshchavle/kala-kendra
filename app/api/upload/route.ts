@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { put } from '@vercel/blob';
 import { getUserFromHeaders } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    const user = getUserFromHeaders(request.headers);
+    const user = await getUserFromHeaders(request.headers);
     if (!user || user.role !== 'seller') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -17,20 +16,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Create a unique filename
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
     const extension = file.name.split('.').pop();
-    const filename = `${uniqueSuffix}.${extension}`;
+    const filename = `products/${uniqueSuffix}.${extension}`;
     
-    const path = join(process.cwd(), 'public', 'uploads', filename);
-    await writeFile(path, buffer);
+    // Uploads directly to Vercel Blob Storage, returns public CDN URL
+    const blob = await put(filename, file, { 
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN, // Injected by Vercel
+    });
     
-    return NextResponse.json({ url: `/uploads/${filename}` });
-  } catch (error) {
+    return NextResponse.json({ url: blob.url });
+  } catch (error: any) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Internal server error during upload' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Vercel Blob Upload failed', 
+      details: error?.message || String(error) 
+    }, { status: 500 });
   }
 }
