@@ -11,8 +11,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Sparkles, Package, Loader2, ArrowLeft, Image as ImageIcon, Video, UploadCloud } from 'lucide-react';
+import { Sparkles, Package, Loader2, ArrowLeft, Image as ImageIcon, Video, UploadCloud, Mic, MicOff } from 'lucide-react';
 import Link from 'next/link';
+import Vapi from '@vapi-ai/web';
+
+const VAPI_PUBLIC_KEY = 'ee0e1ff3-5a7c-49de-b395-478d132f08d6';
+const VAPI_ASSISTANT_ID = 'eb5cbf87-d74f-4d2a-b41c-6409740913a4';
+
+const vapi = new Vapi(VAPI_PUBLIC_KEY);
 
 export default function AddProductPage() {
   const { user, token } = useAuth();
@@ -33,6 +39,53 @@ export default function AddProductPage() {
 
   const update = (key: string, value: string | string[]) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
+
+  const [isVapiConnected, setIsVapiConnected] = useState(false);
+
+  const startVoiceDescribe = async () => {
+    if (isVapiConnected) {
+      vapi.stop();
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      await vapi.start(VAPI_ASSISTANT_ID);
+      setIsVapiConnected(true);
+      toast.info('Voice assistant connected. Speak in Hindi! 🎙️');
+
+      vapi.on('message', (message: any) => {
+        if (message.type === 'tool-calls' || message.type === 'function-call') {
+          const toolCall = message.toolCalls?.[0] || message.functionCall;
+          if (toolCall?.name === 'update_product_details') {
+            const args = JSON.parse(toolCall.arguments || '{}');
+            if (args.description) {
+              update('description', args.description);
+              toast.success('Description filled in English (from Voice)! ✨');
+            }
+            if (args.name) update('name', args.name);
+          }
+        }
+      });
+
+      vapi.on('call-end', () => {
+        setIsVapiConnected(false);
+        setAiLoading(false);
+      });
+
+      vapi.on('error', (err) => {
+        console.error('Vapi error:', err);
+        setIsVapiConnected(false);
+        setAiLoading(false);
+        toast.error('Voice assistant error');
+      });
+
+    } catch (error) {
+      console.error('Vapi start error:', error);
+      setAiLoading(false);
+      toast.error('Failed to start voice assistant');
+    }
+  };
 
   const generateDescription = async () => {
     if (!formData.name || !formData.category || !formData.craftType) {
@@ -76,8 +129,8 @@ export default function AddProductPage() {
       headers: { Authorization: `Bearer ${token}` },
       body: data,
     });
-    if (!res.ok) throw new Error('Upload failed');
     const json = await res.json();
+    if (!res.ok) throw new Error(json.details || json.error || 'Upload failed');
     return json.url;
   };
 
@@ -126,13 +179,23 @@ export default function AddProductPage() {
 
       if (res.ok) {
         toast.success('Product listed successfully! 🎉');
+        if (isVapiConnected) {
+          vapi.send({
+            type: 'add-message',
+            message: {
+              role: 'system',
+              content: 'The product has been successfully added to the marketplace. Please confirm this to the user in Hindi.'
+            }
+          });
+          setTimeout(() => vapi.stop(), 5000);
+        }
         router.push('/seller');
       } else {
         const data = await res.json();
         toast.error(data.error || 'Failed to create product');
       }
-    } catch {
-      toast.error('Error uploading or creating product');
+    } catch (error: any) {
+      toast.error(error?.message || 'Error uploading or creating product');
     }
     setLoading(false);
   };
@@ -208,21 +271,38 @@ export default function AddProductPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="description">Description</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={generateDescription}
-                  disabled={aiLoading}
-                  className="gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
-                >
-                  {aiLoading ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-3.5 w-3.5" />
-                  )}
-                  {aiLoading ? 'Generating...' : 'AI Generate ✨'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={startVoiceDescribe}
+                    disabled={aiLoading && !isVapiConnected}
+                    className={`gap-1.5 border-violet-500/30 text-violet-400 hover:bg-violet-500/10 ${isVapiConnected ? 'bg-violet-500/20 border-violet-500 animate-pulse' : ''}`}
+                  >
+                    {isVapiConnected ? (
+                      <MicOff className="h-3.5 w-3.5" />
+                    ) : (
+                      <Mic className="h-3.5 w-3.5" />
+                    )}
+                    {isVapiConnected ? 'Listening...' : 'Voice Describe 🎙️'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={generateDescription}
+                    disabled={aiLoading}
+                    className="gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  >
+                    {aiLoading && !isVapiConnected ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" />
+                    )}
+                    {aiLoading && !isVapiConnected ? 'Generating...' : 'AI Generate ✨'}
+                  </Button>
+                </div>
               </div>
               <Textarea
                 id="description"
@@ -296,8 +376,8 @@ export default function AddProductPage() {
               </div>
             </div>
             <div className="text-xs text-muted-foreground flex items-center gap-2 mt-2">
-               <UploadCloud className="h-4 w-4" />
-               Files will be uploaded automatically when you publish.
+              <UploadCloud className="h-4 w-4" />
+              Files will be uploaded automatically when you publish.
             </div>
           </CardContent>
         </Card>
@@ -321,7 +401,7 @@ export default function AddProductPage() {
                 min="1"
               />
             </div>
-            
+
             {formData.basePrice && (
               <Card className="bg-amber-500/5 border-amber-500/20">
                 <CardContent className="p-4 text-sm space-y-2">

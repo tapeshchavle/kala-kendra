@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 import { getUserFromHeaders } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -18,19 +20,29 @@ export async function POST(request: Request) {
 
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
     const extension = file.name.split('.').pop();
-    const filename = `products/${uniqueSuffix}.${extension}`;
-    
-    // Uploads directly to Vercel Blob Storage, returns public CDN URL
-    const blob = await put(filename, file, { 
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN, // Injected by Vercel
-    });
-    
-    return NextResponse.json({ url: blob.url });
+    const filename = `${uniqueSuffix}.${extension}`;
+
+    // Hybrid Upload Strategy:
+    // If BLOB_READ_WRITE_TOKEN exists (Vercel Prod), use Blob Storage.
+    // Otherwise (Local Dev), fallback to local filesystem for better DX.
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(`products/${filename}`, file, { 
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      return NextResponse.json({ url: blob.url });
+    } else {
+      // Local development fallback
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const path = join(process.cwd(), 'public', 'uploads', filename);
+      await writeFile(path, buffer);
+      return NextResponse.json({ url: `/uploads/${filename}` });
+    }
   } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json({ 
-      error: 'Vercel Blob Upload failed', 
+      error: 'Upload failed', 
       details: error?.message || String(error) 
     }, { status: 500 });
   }
