@@ -63,7 +63,16 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Card className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-amber-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/5 h-full">
         {/* Image / Craft Type Visual */}
         <div className={`relative h-48 bg-gradient-to-br ${colorClass} flex items-center justify-center overflow-hidden`}>
-          <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{emoji}</span>
+          {product.images && product.images.length > 0 ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img 
+              src={product.images[0]} 
+              alt={product.name} 
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+          ) : (
+            <span className="text-6xl group-hover:scale-110 transition-transform duration-300">{emoji}</span>
+          )}
           {product.giTagged && (
             <Badge className="absolute top-3 right-3 bg-emerald-500/90 text-white border-0 gap-1">
               <Shield className="h-3 w-3" />

@@ -19,7 +19,7 @@ export default function AddProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -93,11 +93,13 @@ export default function AddProductPage() {
       let uploadedImages: string[] = [];
       let uploadedVideoUrl = formData.videoUrl;
 
-      // Upload image
-      if (imageFile) {
-        toast.info('Uploading image...');
-        const url = await uploadFile(imageFile);
-        uploadedImages.push(url);
+      // Upload images
+      if (imageFiles.length > 0) {
+        toast.info(`Uploading ${imageFiles.length} image(s)...`);
+        for (const file of imageFiles) {
+          const url = await uploadFile(file);
+          uploadedImages.push(url);
+        }
       }
 
       // Upload video
@@ -269,10 +271,15 @@ export default function AddProductPage() {
                   id="imageUpload"
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  multiple
+                  onChange={(e) => setImageFiles(Array.from(e.target.files || []))}
                   className="cursor-pointer file:text-amber-500"
                 />
-                {imageFile && <p className="text-xs text-muted-foreground text-amber-500">Selected: {imageFile.name}</p>}
+                {imageFiles.length > 0 && (
+                  <p className="text-xs text-muted-foreground text-amber-500">
+                    Selected: {imageFiles.map(f => f.name).join(', ')}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="videoUpload" className="flex items-center gap-2">
