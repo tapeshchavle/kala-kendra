@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -57,9 +58,13 @@ export default function LoginPage() {
       <Card className="w-full max-w-md bg-card/50 backdrop-blur-sm border-border/50">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white text-2xl font-bold">
-              क
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Kala-Kendra Logo"
+              width={64}
+              height={64}
+              className="object-contain"
+            />
           </div>
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
           <CardDescription>Sign in to your Kala-Kendra account</CardDescription>
