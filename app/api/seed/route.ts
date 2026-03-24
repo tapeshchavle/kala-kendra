@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { seedDatabase } from '@/lib/seed';
 
 export async function POST() {
+  // Trigger Next.js hot reload
   try {
     const result = await seedDatabase();
     return NextResponse.json(result);
