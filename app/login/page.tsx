@@ -102,7 +102,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <p className="text-xs text-center text-muted-foreground">Quick Login (Demo)</p>
             <div className="grid grid-cols-3 gap-2">
-              <Button variant="outline" size="sm" className="text-xs" onClick={() => quickLogin('priya@example.com')}>
+              <Button variant="outline" size="sm" className="text-xs" onClick={() => quickLogin('buyer1@example.com')}>
                 Buyer
               </Button>
               <Button variant="outline" size="sm" className="text-xs" onClick={() => quickLogin('ramesh@example.com')}>
