@@ -32,18 +32,14 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'whatsapp',
-          resource_type: 'auto',
-        },
-        (error, result) => {
-          if (error || !result) return reject(error);
-          resolve(result);
-        },
-      );
-      stream.end(buffer);
+    // Convert file buffer to base64 Data URI to avoid Vercel edge/stream issues
+    const mimeType = file.type || 'application/octet-stream';
+    const base64Data = buffer.toString('base64');
+    const dataURI = `data:${mimeType};base64,${base64Data}`;
+
+    const uploadResult = await cloudinary.uploader.upload(dataURI, {
+      folder: 'whatsapp',
+      resource_type: 'auto',
     });
 
     return NextResponse.json({ url: uploadResult.secure_url });
