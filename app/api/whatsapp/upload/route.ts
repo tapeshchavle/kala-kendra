@@ -16,18 +16,20 @@ export async function POST(request: Request) {
     const extension = file.name ? file.name.split('.').pop() : 'png';
     const filename = `${uniqueSuffix}.${extension}`;
 
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // In production on Vercel, use Blob storage. The @vercel/blob SDK
+    // automatically reads BLOB_READ_WRITE_TOKEN, so we don't need to
+    // pass the token explicitly here.
+    if (process.env.VERCEL && process.env.BLOB_READ_WRITE_TOKEN) {
       console.log('Using Vercel Blob for upload...');
       try {
         const blob = await put(`whatsapp/${filename}`, file, {
           access: 'public',
-          token: process.env.BLOB_READ_WRITE_TOKEN,
         });
         return NextResponse.json({ url: blob.url });
       } catch (blobError: any) {
         console.error('Vercel Blob put error:', blobError);
         return NextResponse.json(
-          { error: 'Vercel Blob upload failed', details: blobError?.message },
+          { error: 'Vercel Blob upload failed', details: blobError?.message || String(blobError) },
           { status: 500 }
         );
       }
