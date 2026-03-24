@@ -11,6 +11,13 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import Script from 'next/script';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, total, itemCount } = useCart();
@@ -26,6 +33,54 @@ export default function CartPage() {
     }
 
     setLoading(true);
+    try {
+      const rzpRes = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ amount: total }),
+      });
+
+      if (!rzpRes.ok) {
+        throw new Error('Failed to initialize payment gateway');
+      }
+
+      const orderOptions = await rzpRes.json();
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderOptions.amount,
+        currency: orderOptions.currency,
+        name: "Kala-Kendra",
+        description: "Purchase Authentic Crafts",
+        order_id: orderOptions.id,
+        handler: async function (response: any) {
+          await finalizeOrder(response.razorpay_payment_id);
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#f59e0b",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        toast.error(response.error?.description || 'Payment Failed');
+        setLoading(false);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || 'Payment initialization error');
+      setLoading(false);
+    }
+  };
+
+  const finalizeOrder = async (paymentId: string) => {
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -44,6 +99,7 @@ export default function CartPage() {
             state: 'Madhya Pradesh',
             pincode: '462001',
           },
+          paymentId,
         }),
       });
 
@@ -54,11 +110,12 @@ export default function CartPage() {
       } else {
         const data = await res.json();
         toast.error(data.error || 'Failed to place order');
+        setLoading(false);
       }
     } catch {
-      toast.error('Network error');
+      toast.error('Network error during order creation');
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (items.length === 0) {
@@ -78,7 +135,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold mb-6">Shopping Cart ({itemCount} items)</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -156,5 +215,6 @@ export default function CartPage() {
         </Card>
       </div>
     </div>
+    </>
   );
 }
