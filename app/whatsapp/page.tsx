@@ -3,6 +3,7 @@
 import ChatWindow from '@/components/whatsapp/ChatWindow';
 import { MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function WhatsAppPage() {
   return (
@@ -19,8 +20,14 @@ export default function WhatsAppPage() {
 
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold text-sm">
-            क
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white overflow-hidden border border-gray-700">
+            <Image 
+              src="/logo.png" 
+              alt="Kala-Kendra Profile" 
+              width={40} 
+              height={40} 
+              className="object-contain"
+            />
           </div>
           {/* Online dot */}
           <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-400 border-2 border-[#202C33]" />
