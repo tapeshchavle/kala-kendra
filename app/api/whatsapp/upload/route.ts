@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+import clientPromise from '@/lib/mongodb';
 
 export async function POST(request: Request) {
   try {
@@ -10,53 +10,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    const apiKey = process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
-    const apiSecret = process.env.CLOUDINARY_API_SECRET || process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET;
-
-    if (!cloudName || !apiKey || !apiSecret) {
-      console.error('Cloudinary env vars missing', { cloudName, apiKey: !!apiKey, apiSecret: !!apiSecret });
-      return NextResponse.json(
-        { error: 'Upload failed', details: 'Cloudinary configuration missing on server' },
-        { status: 500 },
-      );
-    }
-
-    // Configure Cloudinary per request (cheap) to avoid build-time issues
-    cloudinary.config({
-      cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
-    });
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64Data = buffer.toString('base64');
+    const mimeType = file.type || 'application/octet-stream';
 
-    // Use robust upload_stream which handles all file types safely without Base64 memory overhead
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: 'whatsapp',
-          resource_type: 'auto',
-        },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary stream error:', error);
-            return reject(error);
-          }
-          resolve(result);
-        },
-      );
-      
-      // End the stream with the file buffer
-      uploadStream.end(buffer);
+    // Save directly to MongoDB
+    const client = await clientPromise;
+    const db = client.db();
+    
+    const result = await db.collection('whatsapp_images').insertOne({
+      filename: file.name,
+      mimeType: mimeType,
+      size: buffer.length,
+      base64Data: base64Data,
+      createdAt: new Date()
     });
 
-    return NextResponse.json({ url: uploadResult.secure_url });
+    // Provide a URL that will serve this exact image
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || '';
+    const url = `${origin}/api/whatsapp/image/${result.insertedId}`;
+
+    return NextResponse.json({ url });
   } catch (error: any) {
-    console.error('WhatsApp Cloudinary upload error:', error);
+    console.error('WhatsApp MongoDB upload error:', error);
     return NextResponse.json(
-      { error: 'Upload failed', details: error?.message || 'Unknown Cloudinary API error' },
+      { error: 'Upload failed', details: error?.message || 'Unknown database error' },
       { status: 500 },
     );
   }
