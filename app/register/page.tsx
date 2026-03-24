@@ -119,7 +119,7 @@ export default function RegisterPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Craft Type</Label>
-                    <Select value={formData.craftType} onValueChange={(v) => update('craftType', v)}>
+                    <Select value={formData.craftType} onValueChange={(v) => update('craftType', v || '')}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select craft" />
                       </SelectTrigger>

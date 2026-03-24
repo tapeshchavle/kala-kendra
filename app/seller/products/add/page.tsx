@@ -170,7 +170,7 @@ export default function AddProductPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Category</Label>
-                <Select value={formData.category} onValueChange={(v) => update('category', v)}>
+                <Select value={formData.category} onValueChange={(v) => update('category', v || '')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -186,7 +186,7 @@ export default function AddProductPage() {
               </div>
               <div className="space-y-2">
                 <Label>Craft Type</Label>
-                <Select value={formData.craftType} onValueChange={(v) => update('craftType', v)}>
+                <Select value={formData.craftType} onValueChange={(v) => update('craftType', v || '')}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select craft" />
                   </SelectTrigger>
@@ -315,17 +315,6 @@ export default function AddProductPage() {
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="videoUrl">Video URL (Or Paste Link)</Label>
-              <Input
-                id="videoUrl"
-                type="url"
-                placeholder="https://youtube.com/..."
-                value={formData.videoUrl}
-                onChange={(e) => update('videoUrl', e.target.value)}
-              />
-            </div>
-
             {formData.basePrice && (
               <Card className="bg-amber-500/5 border-amber-500/20">
                 <CardContent className="p-4 text-sm space-y-2">

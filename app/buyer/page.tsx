@@ -78,7 +78,7 @@ export default function BuyerPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Select value={craftType} onValueChange={setCraftType}>
+            <Select value={craftType} onValueChange={(v) => setCraftType(v || 'All')}>
               <SelectTrigger className="w-full sm:w-48">
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Craft Type" />
@@ -89,7 +89,7 @@ export default function BuyerPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(v) => setCategory(v || 'All')}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
