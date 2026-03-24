@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ProductCard from '@/components/ProductCard';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import BuyerChatbot from '@/components/BuyerChatbot';
+import { Search, SlidersHorizontal, Sparkles, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Product {
   _id: string;
@@ -27,20 +29,10 @@ const categories = ['All', 'Textiles', 'Paintings', 'Home Decor', 'Sculptures', 
 export default function BuyerPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState('');
+  const [isMagicSearching, setIsMagicSearching] = useState(false);
   const [craftType, setCraftType] = useState('All');
   const [category, setCategory] = useState('All');
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Check URL params for initial craft type filter
-    const params = new URLSearchParams(window.location.search);
-    const ct = params.get('craftType');
-    if (ct) setCraftType(ct);
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [craftType, category, search]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -59,6 +51,46 @@ export default function BuyerPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    // Check URL params for initial craft type filter
+    const params = new URLSearchParams(window.location.search);
+    const ct = params.get('craftType');
+    if (ct) setCraftType(ct);
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [craftType, category, search]);
+
+  const handleMagicSearch = async () => {
+    if (!search.trim()) return;
+    setIsMagicSearching(true);
+    
+    try {
+      const res = await fetch('/api/ai/magic-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: search })
+      });
+      
+      if (res.ok) {
+        const filters = await res.json();
+        if (filters.category && categories.includes(filters.category)) setCategory(filters.category);
+        if (filters.craftType && craftTypes.includes(filters.craftType)) setCraftType(filters.craftType);
+        if (filters.search !== undefined) setSearch(filters.search);
+        
+        toast.success("AI filtered the products for you! ✨");
+      } else {
+        toast.error("Could not understand your request.");
+      }
+    } catch (e) {
+      toast.error("Network error during magic search.");
+    }
+    
+    setIsMagicSearching(false);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -67,38 +99,53 @@ export default function BuyerPage() {
           <h1 className="text-3xl font-bold mb-2">Shop Authentic MP Crafts</h1>
           <p className="text-muted-foreground">Discover handcrafted treasures directly from Madhya Pradesh artisans</p>
 
-          {/* Search & Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 mt-6">
-            <div className="relative flex-1">
+          {/* Unified Search & Filters */}
+          <div className="mt-8 flex flex-col lg:flex-row gap-3 items-center">
+            <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products, crafts, artisans..."
-                className="pl-9"
+                placeholder="Product name, tags, or describe what you want to AI..."
+                className="pl-10 pr-[100px] h-10 rounded-lg border-amber-500/30 focus-visible:border-amber-500/50 focus-visible:ring-amber-500/20 shadow-sm w-full"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleMagicSearch()
+                }}
               />
+              <Button 
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white border border-amber-500/20 shadow-none transition-colors h-8 px-3 text-xs"
+                onClick={handleMagicSearch}
+                disabled={isMagicSearching || !search.trim()}
+                title="Use AI to understand your request and apply filters"
+              >
+                {isMagicSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Sparkles className="h-3 w-3 mr-1.5" /> AI Search</>}
+              </Button>
             </div>
-            <Select value={craftType} onValueChange={(v) => setCraftType(v || 'All')}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Craft Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {craftTypes.map((ct) => (
-                  <SelectItem key={ct} value={ct}>{ct}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={category} onValueChange={(v) => setCategory(v || 'All')}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex gap-3 w-full lg:w-auto shrink-0">
+              <Select value={craftType} onValueChange={(v) => setCraftType(v || 'All')}>
+                <SelectTrigger className="flex-1 lg:w-48 h-10 rounded-lg border-amber-500/30 bg-background/50 backdrop-blur-sm">
+                  <SlidersHorizontal className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Craft Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {craftTypes.map((ct) => (
+                    <SelectItem key={ct} value={ct}>{ct}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={category} onValueChange={(v) => setCategory(v || 'All')}>
+                <SelectTrigger className="flex-1 lg:w-48 h-10 rounded-lg border-amber-500/30 bg-background/50 backdrop-blur-sm">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Active Filters */}
@@ -152,6 +199,8 @@ export default function BuyerPage() {
           </div>
         )}
       </div>
+      
+      <BuyerChatbot />
     </div>
   );
 }
