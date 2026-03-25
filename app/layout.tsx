@@ -40,7 +40,7 @@ export default function RootLayout({
               <Navbar />
               <main className="flex-1">{children}</main>
               <Footer />
-              <Toaster richColors position="top-right" />
+              <Toaster richColors position="bottom-right" />
             </CartProvider>
           </LanguageProvider>
         </AuthProvider>
