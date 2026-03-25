@@ -417,13 +417,11 @@ export default function AddProductPage() {
                     <span>Buyer pays</span>
                     <span className="text-amber-400">₹{platformPrice.toLocaleString()}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    💚 Free for first 6 months! You receive 100% of your price.
-                  </p>
                 </CardContent>
               </Card>
             )}
           </CardContent>
+
         </Card>
 
         <Button
