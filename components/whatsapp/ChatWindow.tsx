@@ -338,7 +338,7 @@ export default function ChatWindow() {
       return;
     }
 
-    if (option.includes('Login Page')) {
+    if (option.includes('Login Page') || option.includes('लॉगिन पेज')) {
       window.location.href = '/login';
       return;
     }
