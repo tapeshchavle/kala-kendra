@@ -276,21 +276,6 @@ export default function AddProductPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={startVoiceDescribe}
-                    disabled={aiLoading && !isVapiConnected}
-                    className={`gap-1.5 border-violet-500/30 text-violet-400 hover:bg-violet-500/10 ${isVapiConnected ? 'bg-violet-500/20 border-violet-500 animate-pulse' : ''}`}
-                  >
-                    {isVapiConnected ? (
-                      <MicOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <Mic className="h-3.5 w-3.5" />
-                    )}
-                    {isVapiConnected ? 'Listening...' : 'Voice Describe 🎙️'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={generateDescription}
                     disabled={aiLoading}
                     className="gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"

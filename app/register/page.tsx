@@ -29,6 +29,8 @@ export default function RegisterPage() {
     village: '',
     story: '',
     yearsOfExperience: '',
+    aadharNumber: '',
+    aadharImage: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,6 +154,27 @@ export default function RegisterPage() {
                   <div className="space-y-2">
                     <Label htmlFor="district">District</Label>
                     <Input id="district" placeholder="Your district" value={formData.district} onChange={(e) => update('district', e.target.value)} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="aadharNumber">Aadhar Number</Label>
+                    <Input id="aadharNumber" placeholder="1234 5678 9012" value={formData.aadharNumber} onChange={(e) => update('aadharNumber', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="aadharImage">Aadhar Image</Label>
+                    <Input 
+                      id="aadharImage" 
+                      type="file" 
+                      accept="image/*"
+                      className="cursor-pointer file:cursor-pointer file:text-amber-500 file:bg-amber-500/10 file:border-0 file:rounded-md file:mr-4 file:px-4 file:py-1 hover:file:bg-amber-500/20"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          update('aadharImage', e.target.files[0].name);
+                        }
+                      }} 
+                    />
                   </div>
                 </div>
 
