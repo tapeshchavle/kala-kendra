@@ -67,7 +67,7 @@ export default function Navbar() {
             {/* Language Toggle (Sellers Only) */}
             {user?.role === 'seller' && (
               <div className="hidden md:flex items-center">
-                <Select value={language} onValueChange={(v: 'en' | 'hi') => setLanguage(v)}>
+                <Select value={language} onValueChange={(v) => v && setLanguage(v as 'en' | 'hi')}>
                   <SelectTrigger className="w-[110px] h-8 border-border/50 bg-background/50 hover:bg-accent focus:ring-0 gap-2">
                     <span className="flex items-center gap-2 text-muted-foreground">
                       <Languages className="h-4 w-4" />
@@ -155,7 +155,7 @@ export default function Navbar() {
           <div className="md:hidden border-t border-border/40 py-4 space-y-2">
             {user?.role === 'seller' && (
               <div className="px-2 py-2">
-                <Select value={language} onValueChange={(v: 'en' | 'hi') => { setLanguage(v); setMobileOpen(false); }}>
+                <Select value={language} onValueChange={(v) => { if (v) { setLanguage(v as 'en' | 'hi'); setMobileOpen(false); } }}>
                   <SelectTrigger className="w-full h-9 bg-transparent border-0 shadow-none text-muted-foreground hover:text-foreground hover:bg-accent flex justify-start items-center gap-2 pl-0 focus:ring-0">
                     <span className="flex items-center gap-2 font-medium">
                       <Languages className="h-4 w-4" />
