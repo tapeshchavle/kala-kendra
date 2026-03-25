@@ -24,11 +24,22 @@ export default function CartPage() {
   const { user, token } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState({
+    line1: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
 
   const handleCheckout = async () => {
     if (!user || !token) {
       toast.error('Please login to place an order');
       router.push('/login');
+      return;
+    }
+
+    if (!shippingAddress.line1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+      toast.error('Please complete your shipping address');
       return;
     }
 
@@ -93,12 +104,7 @@ export default function CartPage() {
             productId: item.productId,
             quantity: item.quantity,
           })),
-          shippingAddress: {
-            line1: '123 Demo Street',
-            city: 'Bhopal',
-            state: 'Madhya Pradesh',
-            pincode: '462001',
-          },
+          shippingAddress: shippingAddress,
           paymentId,
         }),
       });
@@ -141,38 +147,83 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold mb-6">Shopping Cart ({itemCount} items)</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Cart Items */}
-        <div className="lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <Card key={item.productId} className="bg-card/50 border-border/50">
-              <CardContent className="p-4">
-                <div className="flex gap-4">
-                  <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-amber-500/10 to-orange-500/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-2xl">🎨</span>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <h3 className="font-semibold text-sm">{item.name}</h3>
-                    <p className="text-xs text-muted-foreground">{item.craftType} • by {item.sellerName}</p>
-                    <p className="text-amber-400 font-bold">₹{item.price.toLocaleString()}</p>
-                  </div>
-                  <div className="flex flex-col items-end justify-between">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300" onClick={() => removeItem(item.productId)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
-                        <Minus className="h-3 w-3" />
+        {/* Cart Items & Address */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">1. Cart Items</h2>
+            {items.map((item) => (
+              <Card key={item.productId} className="bg-card/50 border-border/50">
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-amber-500/10 to-orange-500/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">🎨</span>
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <h3 className="font-semibold text-sm">{item.name}</h3>
+                      <p className="text-xs text-muted-foreground">{item.craftType} • by {item.sellerName}</p>
+                      <p className="text-amber-400 font-bold">₹{item.price.toLocaleString()}</p>
+                    </div>
+                    <div className="flex flex-col items-end justify-between">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300" onClick={() => removeItem(item.productId)}>
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                      <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
-                        <Plus className="h-3 w-3" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.productId, item.quantity - 1)}>
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.productId, item.quantity + 1)}>
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">2. Shipping Address</h2>
+            <Card className="bg-card/50 border-border/50">
+              <CardContent className="p-4 space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block text-muted-foreground">Address Line</label>
+                  <Input 
+                    placeholder="123 Street Name, Apartment, etc."
+                    value={shippingAddress.line1}
+                    onChange={(e) => setShippingAddress({...shippingAddress, line1: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1 block text-muted-foreground">City</label>
+                    <Input 
+                      placeholder="Bhopal"
+                      value={shippingAddress.city}
+                      onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                     <label className="text-sm font-medium mb-1 block text-muted-foreground">State</label>
+                     <Input 
+                      placeholder="Madhya Pradesh"
+                      value={shippingAddress.state}
+                      onChange={(e) => setShippingAddress({...shippingAddress, state: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1 block text-muted-foreground">Pincode</label>
+                  <Input 
+                    placeholder="462001"
+                    value={shippingAddress.pincode}
+                    onChange={(e) => setShippingAddress({...shippingAddress, pincode: e.target.value})}
+                  />
                 </div>
               </CardContent>
             </Card>
-          ))}
+          </div>
         </div>
 
         {/* Order Summary */}

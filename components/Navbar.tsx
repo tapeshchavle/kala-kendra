@@ -58,10 +58,10 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             {/* Cart */}
             <Link href="/buyer/cart" className="relative">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative overflow-visible">
                 <ShoppingCart className="h-5 w-5" />
                 {itemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-amber-500 text-white border-0">
+                  <Badge className="absolute -top-1.5 -right-1.5 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-white border border-background shadow-sm rounded-full">
                     {itemCount}
                   </Badge>
                 )}
