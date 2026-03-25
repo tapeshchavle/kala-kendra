@@ -5,15 +5,20 @@ export async function generateProductDescription(
   productName: string,
   category: string,
   craftType: string,
-  videoUrl?: string
+  videoUrl?: string,
+  language: 'en' | 'hi' = 'en'
 ): Promise<{ description: string; tags: string[] }> {
   if (!NVIDIA_API_KEY) {
     throw new Error('NVIDIA API key not configured');
   }
 
+  const langInstruction = language === 'hi' 
+    ? 'The entire description must be in Hindi (हिंदी). Do NOT use English script for the description. Use authentic, culturally rich Hindi terms.' 
+    : 'The entire description must be in English. Highlight the artisan craftsmanship.';
+
   const prompt = `You are an expert at writing product descriptions for traditional Indian handicrafts from Madhya Pradesh. 
 
-Generate a compelling, rich product description for:
+Generate a compelling, rich product description in ${language === 'hi' ? 'Hindi' : 'English'} for:
 - Product: ${productName}
 - Category: ${category}  
 - Craft Type: ${craftType}
@@ -26,14 +31,16 @@ The description should:
 4. Be 2-3 paragraphs, warm and inviting
 5. Appeal to buyers who value authentic handmade products
 ${videoUrl ? `6. Include a line inviting the buyer to watch the accompanied video demonstrating its craftsmanship.` : ''}
+7. ${langInstruction}
 
-Also suggest 5 relevant tags for this product.
+Also suggest 5 relevant tags for this product (tags should be in ${language === 'hi' ? 'Hindi' : 'English'}).
 
 Respond in JSON format:
 {
   "description": "...",
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
 }`;
+
 
   const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
     method: 'POST',
