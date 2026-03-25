@@ -88,7 +88,7 @@ export default function Navbar() {
                 <Button variant="ghost" size="icon" className="relative overflow-visible">
                   <ShoppingCart className="h-5 w-5" />
                   {itemCount > 0 && (
-                    <Badge className="absolute -top-1.5 -right-1.5 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-white border border-background shadow-sm rounded-full">
+                    <Badge className="absolute top-0 right-0 h-[18px] w-[18px] flex items-center justify-center p-0 text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-600 text-white border-2 border-background shadow-sm rounded-full">
                       {itemCount}
                     </Badge>
                   )}
