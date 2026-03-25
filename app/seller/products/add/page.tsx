@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,7 @@ const vapi = new Vapi(VAPI_PUBLIC_KEY);
 
 export default function AddProductPage() {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -206,26 +208,26 @@ export default function AddProductPage() {
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
         <Link href="/seller" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-4">
-          <ArrowLeft className="h-4 w-4" /> Back to Dashboard
+          <ArrowLeft className="h-4 w-4" /> {t('backToDashboard')}
         </Link>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Package className="h-6 w-6 text-amber-400" />
-          Add New Product
+          {t('addNewProduct')}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">List your craft for buyers to discover</p>
+        <p className="text-muted-foreground text-sm mt-1">{t('listYourCraft')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card className="bg-card/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">Product Details</CardTitle>
+            <CardTitle className="text-lg">{t('productDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Product Name</Label>
+              <Label htmlFor="name">{t('productName')}</Label>
               <Input
                 id="name"
-                placeholder="e.g. Bagh Print Cotton Saree"
+                placeholder={t('productNamePlaceholder')}
                 value={formData.name}
                 onChange={(e) => update('name', e.target.value)}
                 required
@@ -234,34 +236,34 @@ export default function AddProductPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>{t('category')}</Label>
                 <Select value={formData.category} onValueChange={(v) => update('category', v || '')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
+                    <SelectValue placeholder={t('selectCategory')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Textiles">🧵 Textiles</SelectItem>
-                    <SelectItem value="Paintings">🎨 Paintings</SelectItem>
-                    <SelectItem value="Home Decor">🏠 Home Decor</SelectItem>
-                    <SelectItem value="Sculptures">🗿 Sculptures</SelectItem>
-                    <SelectItem value="Accessories">👜 Accessories</SelectItem>
-                    <SelectItem value="Jewelry">💎 Jewelry</SelectItem>
+                    <SelectItem value="Textiles">{t('textiles')}</SelectItem>
+                    <SelectItem value="Paintings">{t('paintings')}</SelectItem>
+                    <SelectItem value="Home Decor">{t('homeDecor')}</SelectItem>
+                    <SelectItem value="Sculptures">{t('sculptures')}</SelectItem>
+                    <SelectItem value="Accessories">{t('accessories')}</SelectItem>
+                    <SelectItem value="Jewelry">{t('jewelry')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Craft Type</Label>
+                <Label>{t('craftType')}</Label>
                 <Select value={formData.craftType} onValueChange={(v) => update('craftType', v || '')}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select craft" />
+                    <SelectValue placeholder={t('selectCraft')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Bagh Print">🎨 Bagh Print</SelectItem>
-                    <SelectItem value="Gond Art">🖼️ Gond Art</SelectItem>
-                    <SelectItem value="Chanderi Weaving">🧵 Chanderi Weaving</SelectItem>
-                    <SelectItem value="Bell Metal Craft">🔔 Bell Metal Craft</SelectItem>
-                    <SelectItem value="Zardozi Embroidery">✨ Zardozi Embroidery</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="Bagh Print">{t('baghPrint')}</SelectItem>
+                    <SelectItem value="Gond Art">{t('gondArt')}</SelectItem>
+                    <SelectItem value="Chanderi Weaving">{t('chanderiWeaving')}</SelectItem>
+                    <SelectItem value="Bell Metal Craft">{t('bellMetalCraft')}</SelectItem>
+                    <SelectItem value="Zardozi Embroidery">{t('zardoziEmbroidery')}</SelectItem>
+                    <SelectItem value="Other">{t('other')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -270,7 +272,7 @@ export default function AddProductPage() {
             {/* AI Description */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('description')}</Label>
                 <div className="flex items-center gap-2">
                   <Button
                     type="button"
@@ -285,13 +287,13 @@ export default function AddProductPage() {
                     ) : (
                       <Sparkles className="h-3.5 w-3.5" />
                     )}
-                    {aiLoading && !isVapiConnected ? 'Generating...' : 'AI Generate ✨'}
+                    {aiLoading && !isVapiConnected ? t('generating') : t('aiGenerate')}
                   </Button>
                 </div>
               </div>
               <Textarea
                 id="description"
-                placeholder="Describe your product... or click 'AI Generate' to auto-create a description!"
+                placeholder={t('descriptionPlaceholder')}
                 value={formData.description}
                 onChange={(e) => update('description', e.target.value)}
                 rows={6}
@@ -299,7 +301,7 @@ export default function AddProductPage() {
               />
               {aiLoading && (
                 <p className="text-xs text-amber-400 animate-pulse">
-                  🤖 Kimi K2 is crafting a beautiful description for your product...
+                  🤖 {t('aiLoadingMsg')}
                 </p>
               )}
             </div>
@@ -307,7 +309,7 @@ export default function AddProductPage() {
             {/* Tags */}
             {formData.tags.length > 0 && (
               <div className="space-y-2">
-                <Label>AI Suggested Tags</Label>
+                <Label>{t('aiSuggestedTags')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag) => (
                     <Badge key={tag} variant="secondary" className="text-xs">
@@ -323,14 +325,14 @@ export default function AddProductPage() {
         {/* Media Uploads */}
         <Card className="bg-card/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">Media</CardTitle>
-            <CardDescription>Upload photos and videos of your product.</CardDescription>
+            <CardTitle className="text-lg">{t('media')}</CardTitle>
+            <CardDescription>{t('uploadMediaDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="imageUpload" className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4" /> Product Image
+                  <ImageIcon className="h-4 w-4" /> {t('productImage')}
                 </Label>
                 <Input
                   id="imageUpload"
@@ -348,7 +350,7 @@ export default function AddProductPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="videoUpload" className="flex items-center gap-2">
-                  <Video className="h-4 w-4" /> Product Video (Optional)
+                  <Video className="h-4 w-4" /> {t('productVideo')}
                 </Label>
                 <Input
                   id="videoUpload"
@@ -362,7 +364,7 @@ export default function AddProductPage() {
             </div>
             <div className="text-xs text-muted-foreground flex items-center gap-2 mt-2">
               <UploadCloud className="h-4 w-4" />
-              Files will be uploaded automatically when you publish.
+              {t('filesUploadedAuto')}
             </div>
           </CardContent>
         </Card>
@@ -370,16 +372,16 @@ export default function AddProductPage() {
         {/* Pricing */}
         <Card className="bg-card/50 border-border/50">
           <CardHeader>
-            <CardTitle className="text-lg">Pricing</CardTitle>
-            <CardDescription>Set your base price. Platform adds 15% for sustainability.</CardDescription>
+            <CardTitle className="text-lg">{t('pricing')}</CardTitle>
+            <CardDescription>{t('pricingDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Your Price (₹)</Label>
+              <Label htmlFor="price">{t('yourPrice')}</Label>
               <Input
                 id="price"
                 type="number"
-                placeholder="e.g. 3500"
+                placeholder={t('yourPricePlaceholder')}
                 value={formData.basePrice}
                 onChange={(e) => update('basePrice', e.target.value)}
                 required
@@ -391,17 +393,20 @@ export default function AddProductPage() {
               <Card className="bg-amber-500/5 border-amber-500/20">
                 <CardContent className="p-4 text-sm space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Your price</span>
+                    <span className="text-muted-foreground">{t('yourPriceLabel')}</span>
                     <span>₹{Number(formData.basePrice).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Platform fee (15%)</span>
+                    <span className="text-muted-foreground">{t('platformFee')}</span>
                     <span>₹{(platformPrice - Number(formData.basePrice)).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between font-bold border-t border-amber-500/20 pt-2">
-                    <span>Buyer pays</span>
+                    <span>{t('buyerPays')}</span>
                     <span className="text-amber-400">₹{platformPrice.toLocaleString()}</span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('pricingOffer')}
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -419,7 +424,7 @@ export default function AddProductPage() {
           ) : (
             <Package className="h-4 w-4" />
           )}
-          {loading ? 'Publishing...' : 'Publish Product'}
+          {loading ? t('publishing') : t('publishProduct')}
         </Button>
       </form>
     </div>

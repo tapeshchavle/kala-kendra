@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ interface Product {
 
 export default function SellerDashboard() {
   const { user, token } = useAuth();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,13 +55,13 @@ export default function SellerDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Seller Dashboard</h1>
-          <p className="text-muted-foreground text-sm">Welcome back, {user?.name} 🙏</p>
+          <h1 className="text-2xl font-bold">{t('sellerDashboard')}</h1>
+          <p className="text-muted-foreground text-sm">{t('welcomeBack')}, {user?.name} 🙏</p>
         </div>
         <Link href="/seller/products/add">
           <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 gap-2">
             <Plus className="h-4 w-4" />
-            Add Product
+            {t('addProduct')}
           </Button>
         </Link>
       </div>
@@ -67,10 +69,10 @@ export default function SellerDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Products', value: products.length, icon: <Package className="h-5 w-5" />, color: 'text-blue-400' },
-          { label: 'Active', value: products.filter(p => p.status === 'active').length, icon: <Eye className="h-5 w-5" />, color: 'text-green-400' },
-          { label: 'Orders', value: orders.length, icon: <ShoppingBag className="h-5 w-5" />, color: 'text-purple-400' },
-          { label: 'Est. Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: <TrendingUp className="h-5 w-5" />, color: 'text-amber-400' },
+          { label: t('products'), value: products.length, icon: <Package className="h-5 w-5" />, color: 'text-blue-400' },
+          { label: t('active'), value: products.filter(p => p.status === 'active').length, icon: <Eye className="h-5 w-5" />, color: 'text-green-400' },
+          { label: t('orders'), value: orders.length, icon: <ShoppingBag className="h-5 w-5" />, color: 'text-purple-400' },
+          { label: t('estRevenue'), value: `₹${totalRevenue.toLocaleString()}`, icon: <TrendingUp className="h-5 w-5" />, color: 'text-amber-400' },
         ].map((stat) => (
           <Card key={stat.label} className="bg-card/50 border-border/50">
             <CardContent className="p-4 flex items-center gap-3">
@@ -87,10 +89,10 @@ export default function SellerDashboard() {
       {/* Products */}
       <Card className="bg-card/50 border-border/50">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Your Products</CardTitle>
+          <CardTitle className="text-lg">{t('yourProducts')}</CardTitle>
           <Link href="/seller/products/add">
             <Button variant="outline" size="sm" className="gap-1">
-              <Plus className="h-3.5 w-3.5" /> Add New
+              <Plus className="h-3.5 w-3.5" /> {t('addNew')}
             </Button>
           </Link>
         </CardHeader>
@@ -98,7 +100,7 @@ export default function SellerDashboard() {
           {products.length === 0 ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground">No products yet. Add your first craft!</p>
+              <p className="text-muted-foreground">{t('noProducts')}</p>
             </div>
           ) : (
             <div className="divide-y divide-border/50">
@@ -116,7 +118,7 @@ export default function SellerDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-amber-400">₹{product.platformPrice?.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Base: ₹{product.basePrice.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">{t('base')}: ₹{product.basePrice.toLocaleString()}</p>
                   </div>
                 </div>
               ))}

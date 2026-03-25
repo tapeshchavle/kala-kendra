@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
+import { LanguageProvider } from "@/lib/language-context";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
@@ -34,12 +35,14 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AuthProvider>
-          <CartProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <Toaster richColors position="top-right" />
-          </CartProvider>
+          <LanguageProvider>
+            <CartProvider>
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <Toaster richColors position="top-right" />
+            </CartProvider>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

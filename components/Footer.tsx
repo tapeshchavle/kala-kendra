@@ -1,8 +1,19 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import { useLanguage } from '@/lib/language-context';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Footer() {
+  const { t } = useLanguage();
+  const { user } = useAuth();
+  const isSeller = user?.role === 'seller';
+
+  // Helper to fallback to English logic if not a seller
+  const gT = (key: Parameters<typeof t>[0], fallback: string) => isSeller ? t(key) : fallback;
+
   return (
     <footer className="border-t border-border/40 bg-background/50 mt-auto">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -22,35 +33,35 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Empowering Madhya Pradesh artisans by connecting them directly with buyers. Preserving tradition, enabling livelihoods.
+              {gT('footerDesc', 'Empowering Madhya Pradesh artisans by connecting them directly with buyers. Preserving tradition, enabling livelihoods.')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm">Quick Links</h4>
+            <h4 className="font-semibold text-sm">{gT('quickLinks', 'Quick Links')}</h4>
             <div className="flex flex-col gap-2">
-              <Link href="/buyer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Shop All</Link>
-              <Link href="/artisans" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Meet Artisans</Link>
-              <Link href="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Become a Seller</Link>
+              <Link href="/buyer" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{gT('shopAll', 'Shop All')}</Link>
+              <Link href="/artisans" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{gT('meetArtisans', 'Meet Artisans')}</Link>
+              <Link href="/register" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{gT('becomeSeller', 'Become a Seller')}</Link>
             </div>
           </div>
 
           {/* Craft Types */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm">Explore Crafts</h4>
+            <h4 className="font-semibold text-sm">{gT('exploreCrafts', 'Explore Crafts')}</h4>
             <div className="flex flex-col gap-2">
-              <span className="text-sm text-muted-foreground">Bagh Print</span>
-              <span className="text-sm text-muted-foreground">Gond Art</span>
-              <span className="text-sm text-muted-foreground">Chanderi Weaving</span>
-              <span className="text-sm text-muted-foreground">Bell Metal Craft</span>
-              <span className="text-sm text-muted-foreground">Zardozi Embroidery</span>
+              <span className="text-sm text-muted-foreground">{gT('baghPrint', 'Bagh Print')}</span>
+              <span className="text-sm text-muted-foreground">{gT('gondArt', 'Gond Art')}</span>
+              <span className="text-sm text-muted-foreground">{gT('chanderiWeaving', 'Chanderi Weaving')}</span>
+              <span className="text-sm text-muted-foreground">{gT('bellMetalCraft', 'Bell Metal Craft')}</span>
+              <span className="text-sm text-muted-foreground">{gT('zardoziEmbroidery', 'Zardozi Embroidery')}</span>
             </div>
           </div>
 
           {/* Contact */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm">Contact</h4>
+            <h4 className="font-semibold text-sm">{gT('contact', 'Contact')}</h4>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
               <p>📍 Bhopal, Madhya Pradesh</p>
               <p>📞 +91 98765 43210</p>
@@ -62,8 +73,8 @@ export default function Footer() {
         <Separator className="my-8" />
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Kala-Kendra. Made with ❤️ for Madhya Pradesh Artisans</p>
-          <p className="text-xs">Hackathon Prototype — Empowering Rural Artisans</p>
+          <p>{gT('madeWith', '© 2026 Kala-Kendra. Made with ❤️ for Madhya Pradesh Artisans')}</p>
+          <p className="text-xs">{gT('hackathon', 'Hackathon Prototype — Empowering Rural Artisans')}</p>
         </div>
       </div>
     </footer>
