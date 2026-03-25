@@ -21,7 +21,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'Please enter your full name.',
-      hi: 'Kripya apna poora naam darj karein.',
+      hi: 'कृपया अपना पूरा नाम दर्ज करें।',
     },
     field: 'name',
     inputType: 'text',
@@ -29,7 +29,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'Please enter your full address.',
-      hi: 'Kripya apna poora pata darj karein.',
+      hi: 'कृपया अपना पूरा पता दर्ज करें।',
     },
     field: 'address',
     inputType: 'text',
@@ -37,7 +37,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'Please enter your 12-digit Aadhaar number.',
-      hi: 'Kripya apna 12-digit Aadhaar number darj karein.',
+      hi: 'कृपया अपना 12-अंकीय आधार नंबर दर्ज करें।',
     },
     field: 'aadhaar_number',
     inputType: 'text',
@@ -45,7 +45,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'Please upload a clear photo of your Aadhaar card.',
-      hi: 'Kripya apne Aadhaar card ki saaf photo upload karein.',
+      hi: 'कृपया अपने आधार कार्ड की साफ फोटो अपलोड करें।',
     },
     field: 'aadhaar_image',
     inputType: 'file',
@@ -54,7 +54,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'What is the name of your product / craft?',
-      hi: 'Aapke product / shilp ka naam kya hai?',
+      hi: 'आपके उत्पाद / शिल्प का नाम क्या है?',
     },
     field: 'product_name',
     inputType: 'text',
@@ -62,7 +62,7 @@ const STEPS: StepConfig[] = [
   {
     prompt: {
       en: 'Tell us your story as an artisan. You can type your story or upload a short video about yourself.',
-      hi: 'Hume apni kahani bataiye ek shilpkaar ke roop mein. Aap apni kahani likh sakte hain ya apne baare mein ek chhota video upload kar sakte hain.',
+      hi: 'हमें एक शिल्पकार के रूप में अपनी कहानी बताएं। आप अपनी कहानी टाइप कर सकते हैं या अपने बारे में एक छोटा वीडियो अपलोड कर सकते हैं।',
     },
     field: 'artist_story',
     inputType: 'text-or-file',
@@ -122,7 +122,7 @@ export default function ChatWindow() {
         setMessages([
           {
             id: msgId(),
-            text: '🙏 Namaste! Welcome to Kala-Kendra.\nType "Hi" to begin your artisan registration.',
+            text: '🙏 Namaste! Welcome to Kala-Kendra.\n\nType "Hi" to begin your artisan registration.\nअपना पंजीकरण शुरू करने के लिए "Hi" टाइप करें।',
             sender: 'bot',
             timestamp: new Date(),
             type: 'text',
@@ -225,19 +225,19 @@ export default function ChatWindow() {
         setTimeout(async () => {
           const msg =
             language === 'hi'
-              ? `✅ Dhanyavaad! Aapka registration poora ho gaya hai.\n\n📧 Email: ${json.credentials.email}\n🔑 Password: ${json.credentials.password}\n\nAb aap niche diye gaye button se Login karein aur apna kaam dikhayein.`
+              ? `✅ धन्यवाद! आपका पंजीकरण पूरा हो गया है।\n\n📧 ईमेल: ${json.credentials.email}\n🔑 पासवर्ड: ${json.credentials.password}\n\nअब आप नीचे दिए गए बटन से लॉगिन करें और अपना काम दिखाना शुरू करें।`
               : `✅ Thank you! Your registration is complete.\n\n📧 Email: ${json.credentials.email}\n🔑 Password: ${json.credentials.password}\n\nPlease click the button below to Login and start showcasing your work.`;
           
           await addBotMessage(msg, {
             type: 'option',
-            options: [language === 'hi' ? 'Login Page par Jayein 🔗' : 'Go to Login Page 🔗']
+            options: [language === 'hi' ? 'लॉगिन पेज पर जाएं 🔗' : 'Go to Login Page 🔗']
           });
         }, 1500);
       } catch (err) {
         console.error('Registration error:', err);
         await addBotMessage(
           language === 'hi'
-            ? '⚠️ Kuch gadbad ho gayi. Kripya dobara koshish karein.'
+            ? '⚠️ कुछ गड़बड़ हो गई। कृपया दोबारा कोशिश करें।'
             : '⚠️ Something went wrong. Please try again later.',
         );
       }
@@ -263,11 +263,14 @@ export default function ChatWindow() {
       if (/^(hi|hello|hey|namaste)/i.test(text)) {
         setStep(0);
         await addBotMessage(
-          'Aap kis language mein baat karna chahte hain?\nWhich language would you like to continue in?',
+          'आप किस भाषा में बात करना चाहते हैं?\nWhich language would you like to continue in?',
           { type: 'option', options: ['English', 'Hindi'] },
         );
       } else {
-        await addBotMessage('Please type "Hi" to start. 🙏');
+        const fallback = language === 'hi' 
+          ? '🙏 शुरू करने के लिए "Hi" टाइप करें।' 
+          : '🙏 Please type "Hi" to start.';
+        await addBotMessage(fallback);
       }
       return;
     }
@@ -281,7 +284,7 @@ export default function ChatWindow() {
         if (!isValid) {
           const errorMsg =
             language === 'hi'
-              ? '⚠️ Kripya sahi 12-digit Aadhaar number darj karein.'
+              ? '⚠️ कृपया सही 12-अंकीय आधार नंबर दर्ज करें।'
               : '⚠️ Please enter a valid 12-digit Aadhaar number.';
           await addBotMessage(errorMsg);
           return;
@@ -303,7 +306,7 @@ export default function ChatWindow() {
       } else {
         const hint =
           language === 'hi'
-            ? '📎 Kripya file upload karein (clip icon use karein).'
+            ? '📎 कृपया फ़ाइल अपलोड करें (क्लिप आइकन का उपयोग करें)।'
             : '📎 Please upload a file using the attachment icon.';
         await addBotMessage(hint);
       }
@@ -326,7 +329,7 @@ export default function ChatWindow() {
 
       const welcome =
         lang === 'hi'
-          ? '👋 Swaagat hai! Aapka registration shuru karte hain.\nKripya neeche diye gaye sawaalon ka jawaab dein.'
+          ? '👋 स्वागत है! आपका पंजीकरण शुरू करते हैं।\nकृपया नीचे दिए गए सवालों के जवाब दें।'
           : '👋 Welcome! Let\'s begin your registration.\nPlease answer the following questions.';
       await addBotMessage(welcome);
       const config = STEPS[0];
@@ -394,7 +397,7 @@ export default function ChatWindow() {
 
       // Confirmation
       const confirmMsg =
-        language === 'hi' ? '✅ File(s) upload ho gayi!' : '✅ File(s) uploaded successfully!';
+        language === 'hi' ? '✅ फ़ाइल(स) अपलोड हो गई!' : '✅ File(s) uploaded successfully!';
       await addBotMessage(confirmMsg, undefined, 400);
 
       // Auto-advance
@@ -411,7 +414,7 @@ export default function ChatWindow() {
       console.error('Upload error:', err);
       const errMsg =
         language === 'hi'
-          ? '⚠️ Upload mein samasya aayi. Kripya dobara try karein.'
+          ? '⚠️ अपलोड में समस्या आई। कृपया दोबारा कोशिश करें।'
           : '⚠️ Upload failed. Please try again.';
       await addBotMessage(errMsg);
     }
@@ -432,14 +435,14 @@ export default function ChatWindow() {
         placeholder:
           config.inputType === 'file' || config.inputType === 'files'
             ? language === 'hi'
-              ? '📎 File upload karein...'
+              ? '📎 फ़ाइल अपलोड करें...'
               : '📎 Upload a file...'
             : config.inputType === 'text-or-file'
               ? language === 'hi'
-                ? 'Type karein ya file upload karein...'
+                ? 'टाइप करें या फ़ाइल अपलोड करें...'
                 : 'Type or upload a file...'
               : language === 'hi'
-                ? 'Yahan type karein...'
+                ? 'यहाँ टाइप करें...'
                 : 'Type here...',
       };
     }

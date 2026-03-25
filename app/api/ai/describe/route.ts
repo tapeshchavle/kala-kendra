@@ -4,7 +4,7 @@ import { generateProductDescription } from '@/lib/kimi';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { productName, category, craftType, videoUrl } = body;
+    const { productName, category, craftType, videoUrl, language } = body;
 
     if (!productName || !category || !craftType) {
       return NextResponse.json(
@@ -13,7 +13,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await generateProductDescription(productName, category, craftType, videoUrl);
+    const result = await generateProductDescription(productName, category, craftType, videoUrl, language || 'en');
+
 
     return NextResponse.json(result);
   } catch (error) {
